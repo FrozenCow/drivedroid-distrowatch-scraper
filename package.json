@@ -1,0 +1,16 @@
+{
+  "name": "drivedroid-distrowatch-repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^0.9.0",
+    "cheerio": "^0.18.0",
+    "most": "^0.9.1",
+    "request": "^2.48.0",
+    "sugar": "^1.4.1",
+    "when": "^3.6.3"
+  }
+}
