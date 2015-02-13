@@ -227,6 +227,36 @@ most.from(['http://distrowatch.com/'])
     )
     .then(objectToArray)
     .then(map.bind(null,second))
+    // Find the Home Page for each distribution.
+    .then(function(distributions) {
+        return most.from(distributions)
+            .map(function(distribution) {
+                if (distribution.url) {
+                    return when(distribution);
+                } else {
+                    return most.from(['http://distrowatch.com/table.php?distribution='+distribution.id])
+                        .map(function(url) { return request.domAsync(url); })
+                        .await()
+                        .flatMap(function($) {
+                            return most.fromCheerio($('table.Info tr'));
+                        })
+                        .filter(function(row) {
+                            return row.find('th.Info').text() === 'Home Page';
+                        })
+                        .map(function(row) {
+                            return row.find('td.Info a').attr('href');
+                        })
+                        .head()
+                        .then(function(homepageUrl) {
+                            return extend(distribution,{
+                                url: homepageUrl
+                            });
+                        });
+                }
+            })
+            .await()
+            .reduce(function(result,item) { return result.concat(item); },[]); // toArray
+    })
     .then(function(distributions) {
         var errors = validation.validateDistributions(distributions);
         if (errors.length > 0) {
@@ -235,12 +265,7 @@ most.from(['http://distrowatch.com/'])
         return distributions;
     })
     .then(JSON.stringify)
-    .then(fs.writeFileAsync.bind(null,"distrowatch.json"))
-    .catch(function(error) {
-        console.error(error);
-        require('process').exit(1);
-        return false;
-    });
+    .then(fs.writeFileAsync.bind(null,"distrowatch.json"));
 
 function mergeDistribution(distributions,newDistribution) {
     var id = newDistribution.id;
@@ -255,14 +280,16 @@ function mergeDistribution(distributions,newDistribution) {
         // We have to make sure that the new releases have priority over the old ones.
         // We use the URLs to determine conflicting releases and make sure the only the
         // non-conflicting old releases are added to the new distribution.
-        newDistribution.releases = newDistribution.releases.concat(
-            oldDistribution.releases.filter(function(oldRelease) {
-                return !newDistribution.releases.some(function(newRelease) {
-                    return oldRelease.url === newRelease.url;
-                });
-            })
-        );
-        distributions[id] = newDistribution;
+        var mergedDistribution = extend(oldDistribution,newDistribution,{
+            releases: newDistribution.releases.concat(
+                oldDistribution.releases.filter(function(oldRelease) {
+                    return !newDistribution.releases.some(function(newRelease) {
+                        return oldRelease.url === newRelease.url;
+                    });
+                })
+            )
+        });
+        distributions[id] = mergedDistribution;
     }
     return distributions;
 }
