@@ -79,7 +79,7 @@ function requestContentLength(options,cb) {
 	Object.merge(newOptions,options);
 	requestBase(newOptions,function(err,response) {
 		if (err) { return cb(err,null,response); }
-		if (response.statusCode < 200 || response.statusCode >= 300) { return cb(null,null,response); }
+		if (response.statusCode < 200 || response.statusCode >= 300) { return cb(new Error('Server returned non-OK Status code: '+response.statusCode),null,response); }
 		var contentLength = response.headers['content-length'];
 		if (contentLength === undefined) {
 			return cb(null,contentLength,response);
