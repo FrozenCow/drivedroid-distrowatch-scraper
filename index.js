@@ -153,6 +153,22 @@ most.from(['http://distrowatch.com/'])
             title: match[2]
         });
     })
+    // Home Page
+    .map(function(releaseNewsItem) {
+        return most.from(['http://distrowatch.com/table.php?distribution='+releaseNewsItem.id])
+            .map(function(url) { return request.domAsync(url); })
+            .await()
+            .flatMap(function($) { return most.fromCheerio($('table.Info tr')); })
+            .filter(function(row) { return row.find('th.Info').text() === 'Home Page'; })
+            .map(function(row) { return row.find('td.Info a').attr('href'); })
+            .head()
+            .then(function(homepageUrl) {
+                return extend(releaseNewsItem,{
+                    homepage: homepageUrl
+                });
+            });
+    })
+    .await()
     // Version
     .compactMap(function(releaseNewsItem) {
         /* title: {name} {version} "{extras}" */
@@ -214,6 +230,7 @@ most.from(['http://distrowatch.com/'])
             id: releaseNewsItem.id,
             name: releaseNewsItem.title,
             imageUrl: releaseNewsItem.logo,
+            url: releaseNewsItem.homepage,
             releases: [objectFilter(isTrueish,{
                 version: releaseNewsItem.version,
                 url: releaseNewsItem.downloadUrl,
@@ -228,36 +245,6 @@ most.from(['http://distrowatch.com/'])
     )
     .then(objectToArray)
     .then(map.bind(null,second))
-    // Find the Home Page for each distribution.
-    .then(function(distributions) {
-        return most.from(distributions)
-            .map(function(distribution) {
-                if (distribution.url) {
-                    return when(distribution);
-                } else {
-                    return most.from(['http://distrowatch.com/table.php?distribution='+distribution.id])
-                        .map(function(url) { return request.domAsync(url); })
-                        .await()
-                        .flatMap(function($) {
-                            return most.fromCheerio($('table.Info tr'));
-                        })
-                        .filter(function(row) {
-                            return row.find('th.Info').text() === 'Home Page';
-                        })
-                        .map(function(row) {
-                            return row.find('td.Info a').attr('href');
-                        })
-                        .head()
-                        .then(function(homepageUrl) {
-                            return extend(distribution,{
-                                url: homepageUrl
-                            });
-                        });
-                }
-            })
-            .await()
-            .reduce(function(result,item) { return result.concat(item); },[]); // toArray
-    })
     // Validate the distributions
     .then(function(distributions) {
         var errors = validation.validateDistributions(distributions);
