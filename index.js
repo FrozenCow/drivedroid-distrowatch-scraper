@@ -222,6 +222,7 @@ most.from(['http://distrowatch.com/'])
             })]
         };
     })
+    // Merge the existing JSON file with the retrieved distribution entries
     .reduce(mergeDistribution,
         arrayToObject(JSON.parse(fs.readFileSync('distrowatch.json')).map(function(distro) { return [distro.id,distro]; }))
     )
@@ -257,6 +258,7 @@ most.from(['http://distrowatch.com/'])
             .await()
             .reduce(function(result,item) { return result.concat(item); },[]); // toArray
     })
+    // Validate the distributions
     .then(function(distributions) {
         var errors = validation.validateDistributions(distributions);
         if (errors.length > 0) {
@@ -264,6 +266,7 @@ most.from(['http://distrowatch.com/'])
         }
         return distributions;
     })
+    // Write the distributions as a JSON file to disk
     .then(JSON.stringify)
     .then(fs.writeFileAsync.bind(null,"distrowatch.json"));
 
