@@ -10,6 +10,7 @@ var http = require('http');
 var most = require('most');
 var request = whenNode.liftAll(require('./request'),transform);
 var URL = require('url');
+var validation = require('./validation.js');
 
 // Globals
 function identity(x) {
@@ -226,6 +227,13 @@ most.from(['http://distrowatch.com/'])
     )
     .then(objectToArray)
     .then(map.bind(null,second))
+    .then(function(distributions) {
+        var errors = validation.validateDistributions(distributions);
+        if (errors.length > 0) {
+            throw validation.ValidationError(errors);
+        }
+        return distributions;
+    })
     .then(JSON.stringify)
     .then(fs.writeFileAsync.bind(null,"distrowatch.json"));
 
