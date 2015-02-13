@@ -162,7 +162,7 @@ most.from(['http://distrowatch.com/'])
         if (!match) { return null; }
         return extend(releaseNewsItem,{
             title: releaseNewsItem.logoTitle,
-            version: match[1]
+            version: match[1].trim()
         });
     })
     // Download url
