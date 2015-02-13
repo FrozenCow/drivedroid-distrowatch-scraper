@@ -235,7 +235,12 @@ most.from(['http://distrowatch.com/'])
         return distributions;
     })
     .then(JSON.stringify)
-    .then(fs.writeFileAsync.bind(null,"distrowatch.json"));
+    .then(fs.writeFileAsync.bind(null,"distrowatch.json"))
+    .catch(function(error) {
+        console.error(error);
+        require('process').exit(1);
+        return false;
+    });
 
 function mergeDistribution(distributions,newDistribution) {
     var id = newDistribution.id;
