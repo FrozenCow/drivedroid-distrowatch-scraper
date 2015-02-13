@@ -230,7 +230,7 @@ most.from(['http://distrowatch.com/'])
     .then(function(distributions) {
         var errors = validation.validateDistributions(distributions);
         if (errors.length > 0) {
-            throw validation.ValidationError(errors);
+            throw new validation.ValidationError(errors);
         }
         return distributions;
     })
