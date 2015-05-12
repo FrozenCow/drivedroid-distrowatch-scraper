@@ -185,7 +185,7 @@ most.from(['http://distrowatch.com/'])
     .flatMap(function(releaseNewsItem) {
         return most.fromCheerio(releaseNewsItem.content.find('a'))
             .map(function(a) { return a.attr('href'); })
-            .filter(function(url) { return /^(http|https|ftp):.*\.(iso|img)$/i.test(url); })
+            .filter(function(url) { return /^(http|https):.*\.(iso|img)$/i.test(url); })
             .map(function(url) {
                 return extend(releaseNewsItem,{
                     downloadUrl: url
