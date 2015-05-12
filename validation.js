@@ -22,6 +22,7 @@ function validateDistribution(distro) {
             if (typeof release !== 'object') { pushError('Release is not an object'); return; }
             if (!release.url) { pushError('Release does not have an url'); }
             if (!release.size) { pushError('Release "'+release.url+'" does not have a size'); }
+            if (typeof release.size !== 'number') { pushError('Release "'+release.url+'" does not have a numeric size'); }
             // Version is optional.
             //if (!release.version) { pushError('Release "'+release.url+'" does not have an version'); }
             if (!/^http:\/\//.test(release.url)) { pushError('Release "'+release.url+'" is not an url'); }
