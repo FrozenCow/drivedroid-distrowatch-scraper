@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 function transform(promisedFs, liftedFunc, name) {
     promisedFs[name + 'Async'] = liftedFunc;
     return promisedFs;

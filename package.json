@@ -2,6 +2,9 @@
   "name": "drivedroid-distrowatch-repo",
   "version": "1.0.0",
   "description": "",
+  "bin": {
+    "drivedroid-distrowatch-scraper": "index.js"
+  },
   "main": "index.js",
   "author": "",
   "license": "ISC",
